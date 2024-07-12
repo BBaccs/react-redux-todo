@@ -8,6 +8,7 @@ const initialState = {
 export default function rootReducer(state = initialState, action) {
     switch (action.type) {
         case ADD_TODO:
+            debugger;
             const newState = { ...state };
             newState.id++;
             return {
