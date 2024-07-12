@@ -1,13 +1,14 @@
 import React, { Component } from 'react';
 import Todo from './Todo';
 import { connect } from "react-redux";
-import { ADD_TODO } from './actionCreators'; // Import the action creator
+import { ADD_TODO, REMOVE_TODO } from './actionCreators'; // Import the action creator
 
 class TodoList extends Component {
   constructor(props) {
     super(props);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleChange = this.handleChange.bind(this);
+    this.removeTodo = this.removeTodo.bind(this);
   }
   handleSubmit(e) {
     e.preventDefault();
@@ -24,10 +25,16 @@ class TodoList extends Component {
       [e.target.name]: e.target.value
     })
   }
+  removeTodo(id){
+    this.props.dispatch({
+      type: REMOVE_TODO,
+      id
+    })
+  }
   render() {
     let todos = this.props.todos.map((val, index) => {
       console.log(val, "val");
-      return <Todo task={val.task} key={index} />;
+      return <Todo removeTodo={() => this.removeTodo(val.id)} task={val.task} key={index} />;
     });
     
     return (
@@ -35,7 +42,7 @@ class TodoList extends Component {
         <form onSubmit={this.handleSubmit}>
           <label htmlFor="task">Task</label>
           <input type="text" name="task" id="task" onChange={this.handleChange} />
-          <input type="submit" className="btn btn-default">add todo</input>
+          <button type="submit" className="btn btn-default">Add Todo</button>
         </form>
         <ul>
           {todos}
