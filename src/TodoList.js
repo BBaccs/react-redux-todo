@@ -11,14 +11,12 @@ class TodoList extends Component {
   }
   handleSubmit(e) {
     e.preventDefault();
-    const task = e.target.task.value.trim();
-    if (task) {
+    // const task = e.target.task.value.trim();
       this.props.dispatch({
-        type: ADD_TODO,
+        type: "ADD_TODO",
         task: this.state.task
       });
       e.target.reset();
-    }
   }
 
   handleChange(e) {
@@ -27,9 +25,11 @@ class TodoList extends Component {
     })
   }
   render() {
-    let todos = this.props.todos.map((val, index) => (
-      <Todo task={val.task} key={index} />
-    ));
+    let todos = this.props.todos.map((val, index) => {
+      console.log(val, "val");
+      return <Todo task={val.task} key={index} />;
+    });
+    
     return (
       <div>
         <form onSubmit={this.handleSubmit}>
