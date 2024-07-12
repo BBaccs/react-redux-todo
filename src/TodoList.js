@@ -1,23 +1,27 @@
 import React, { Component } from 'react';
 import Todo from './Todo';
 import { connect } from "react-redux";
-import { ADD_TODO, REMOVE_TODO } from './actionCreators'; // Import the action creator
+import { ADD_TODO, REMOVE_TODO, UPDATE_TODO } from './actionCreators'; // Import the action creator
 
 class TodoList extends Component {
   constructor(props) {
     super(props);
+    this.state = { task: '' };
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.removeTodo = this.removeTodo.bind(this);
+    this.updateTodo = this.updateTodo.bind(this);
   }
   handleSubmit(e) {
     e.preventDefault();
-    // const task = e.target.task.value.trim();
-      this.props.dispatch({
-        type: ADD_TODO,
-        task: this.state.task
-      });
-      e.target.reset();
+    this.props.dispatch({
+      type: ADD_TODO,
+      task: this.state.task
+    });
+    this.setState({
+      task: ''
+    })
+    e.target.reset();
   }
 
   handleChange(e) {
@@ -25,23 +29,35 @@ class TodoList extends Component {
       [e.target.name]: e.target.value
     })
   }
-  removeTodo(id){
+  removeTodo(id) {
     this.props.dispatch({
       type: REMOVE_TODO,
       id
     })
   }
+  updateTodo(id, task) {
+    this.props.dispatch({
+      type: UPDATE_TODO,
+      id,
+      task
+    })
+  }
+
   render() {
     let todos = this.props.todos.map((val, index) => {
-      console.log(val, "val");
-      return <Todo removeTodo={() => this.removeTodo(val.id)} task={val.task} key={index} />;
+      return <Todo removeTodo={() => this.removeTodo(val.id)} updateTodo={() => this.updateTodo(val.id, val.task)} task={val.task} key={index} />;
     });
-    
+
     return (
       <div>
         <form onSubmit={this.handleSubmit}>
           <label htmlFor="task">Task</label>
-          <input type="text" name="task" id="task" onChange={this.handleChange} />
+          <input
+            type="text"
+            name="task"
+            id="task"
+            value={this.state.task} // Controlled input
+            onChange={this.handleChange} />
           <button type="submit" className="btn btn-default">Add Todo</button>
         </form>
         <ul>
