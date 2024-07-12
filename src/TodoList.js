@@ -13,7 +13,7 @@ class TodoList extends Component {
     e.preventDefault();
     // const task = e.target.task.value.trim();
       this.props.dispatch({
-        type: "ADD_TODO",
+        type: ADD_TODO,
         task: this.state.task
       });
       e.target.reset();
@@ -35,7 +35,7 @@ class TodoList extends Component {
         <form onSubmit={this.handleSubmit}>
           <label htmlFor="task">Task</label>
           <input type="text" name="task" id="task" onChange={this.handleChange} />
-          <button type="button" className="btn btn-default">add todo</button>
+          <input type="submit" className="btn btn-default">add todo</input>
         </form>
         <ul>
           {todos}
