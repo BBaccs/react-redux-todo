@@ -2,24 +2,18 @@ export const ADD_TODO = "ADD_TODO";
 export const REMOVE_TODO = "REMOVE_TODO";
 export const EDIT_TODO = "EDIT_TODO";
 
-export function addToDo(task) {
-    return {
-        type: ADD_TODO,
-        task
-    };
-}
+export const addTodo = task => ({
+    type: ADD_TODO,
+    task
+});
 
-export function removeTodo(id) {
-    return {
-        type: REMOVE_TODO,
-        id
-    };
-}
+export const removeTodo = id => ({
+    type: REMOVE_TODO,
+    id
+});
 
-export function editTodo(id, task) {
-    return {
-        type: EDIT_TODO,
-        id,
-        task
-    };
-}
+export const editTodo = (id, task) => ({
+    type: EDIT_TODO,
+    id,
+    task
+});
