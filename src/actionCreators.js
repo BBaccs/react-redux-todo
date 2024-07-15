@@ -1,6 +1,6 @@
 export const ADD_TODO = "ADD_TODO";
 export const REMOVE_TODO = "REMOVE_TODO";
-export const UPDATE_TODO = "UPDATE_TODO";
+export const EDIT_TODO = "EDIT_TODO";
 
 export function addToDo(task) {
     return {
@@ -16,9 +16,9 @@ export function removeTodo(id) {
     };
 }
 
-export function updateTodo(id, task) {
+export function editTodo(id, task) {
     return {
-        type: UPDATE_TODO,
+        type: EDIT_TODO,
         id,
         task
     };
