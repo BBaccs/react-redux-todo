@@ -1,7 +1,8 @@
 import React, { Component, createRef } from 'react';
-import Todo from './Todo';
 import { connect } from "react-redux";
-import { ADD_TODO, REMOVE_TODO, EDIT_TODO } from './actionCreators';
+import { addTodo, removeTodo, editTodo } from './actionCreators';
+import Todo from './Todo';
+import PropTypes from 'prop-types';
 
 class TodoList extends Component {
   constructor(props) {
@@ -11,28 +12,25 @@ class TodoList extends Component {
 
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleChange = this.handleChange.bind(this);
-    this.removeTodo = this.removeTodo.bind(this);
-    this.editTodo = this.editTodo.bind(this);
     this.handleEditChange = this.handleEditChange.bind(this);
     this.saveEditTodo = this.saveEditTodo.bind(this);
   }
 
   handleSubmit(e) {
     e.preventDefault();
-    this.props.dispatch({
-      type: ADD_TODO,
-      task: this.state.task
-    });
-    this.setState({ task: '' });
-    e.target.reset();
+    if (this.state.task.length > 0) {
+      this.props.addTodo(this.state.task);
+      this.setState({ task: '' });
+      e.target.reset();
+    }
   }
 
   handleChange(e) {
     this.setState({ [e.target.name]: e.target.value });
   }
 
-  removeTodo(id) {
-    this.props.dispatch({ type: REMOVE_TODO, id });
+  handleEditChange(e) {
+    this.setState({ editTask: e.target.value });
   }
 
   editTodo = (index, task) => {
@@ -43,12 +41,8 @@ class TodoList extends Component {
     });
   }
 
-  handleEditChange(e) {
-    this.setState({ editTask: e.target.value });
-  }
-
   saveEditTodo = (id) => {
-    this.props.dispatch({ type: EDIT_TODO, id, task: this.state.editTask });
+    this.props.editTodo(id, this.state.editTask);
     this.setState({ editTask: '', editTaskIndex: null });
   }
 
@@ -59,29 +53,8 @@ class TodoList extends Component {
   }
 
   render() {
-    let todos = this.props.todos.map((val, index) => {
-      return (
-        <li key={val.id}>
-          {this.state.editTaskIndex === index ? (
-            <input
-              ref={this.editInputRef}
-              type="text"
-              value={this.state.editTask}
-              onChange={this.handleEditChange}
-              onBlur={() => this.saveEditTodo(val.id)}
-              onKeyPress={(e) => this.handleEditKeyPress(e, val.id)}
-              autoFocus
-            />
-          ) : (
-            <Todo
-              removeTodo={() => this.removeTodo(val.id)}
-              editTodo={() => this.editTodo(index, val.task)}
-              task={val.task}
-            />
-          )}
-        </li>
-      );
-    });
+    const { todos, removeTodo } = this.props;
+    const { task, editTask, editTaskIndex } = this.state;
 
     return (
       <div>
@@ -91,23 +64,54 @@ class TodoList extends Component {
             type="text"
             name="task"
             id="task"
-            value={this.state.task}
+            value={task}
             onChange={this.handleChange}
           />
           <button type="submit" className="btn btn-default">Add Todo</button>
         </form>
         <ul>
-          {todos}
+          {todos.map((val, index) => (
+            <li key={val.id}>
+              {editTaskIndex === index ? (
+                <input
+                  ref={this.editInputRef}
+                  type="text"
+                  value={editTask}
+                  onChange={this.handleEditChange}
+                  onBlur={() => this.saveEditTodo(val.id)}
+                  onKeyPress={(e) => this.handleEditKeyPress(e, val.id)}
+                  autoFocus
+                />
+              ) : (
+                <Todo
+                  removeTodo={() => removeTodo(val.id)}
+                  editTodo={() => this.editTodo(index, val.task)}
+                  task={val.task}
+                />
+              )}
+            </li>
+          ))}
         </ul>
       </div>
     );
   }
 }
 
-function mapStateToProps(reduxState) {
-  return {
-    todos: reduxState.todos
-  };
-}
+TodoList.propTypes = {
+  todos: PropTypes.array.isRequired,
+  addTodo: PropTypes.func.isRequired,
+  removeTodo: PropTypes.func.isRequired,
+  editTodo: PropTypes.func.isRequired
+};
 
-export default connect(mapStateToProps)(TodoList);
+const mapStateToProps = state => ({
+  todos: state.todos
+});
+
+const mapDispatchToProps = {
+  addTodo,
+  removeTodo,
+  editTodo
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(TodoList);
