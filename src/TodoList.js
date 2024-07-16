@@ -1,117 +1,94 @@
-import React, { Component, createRef } from 'react';
-import { connect } from "react-redux";
+import React, { useState, useRef, useCallback } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { addTodo, removeTodo, editTodo } from './actionCreators';
 import Todo from './Todo';
-import PropTypes from 'prop-types';
 
-class TodoList extends Component {
-  constructor(props) {
-    super(props);
-    this.state = { task: '', editTask: '', editTaskIndex: null };
-    this.editInputRef = createRef();
+const TodoList = () => {
+    const [task, setTask] = useState('');
+    const [editTask, setEditTask] = useState('');
+    const [editTaskIndex, setEditTaskIndex] = useState(null);
+    const editInputRef = useRef(null);
 
-    this.handleSubmit = this.handleSubmit.bind(this);
-    this.handleChange = this.handleChange.bind(this);
-    this.handleEditChange = this.handleEditChange.bind(this);
-    this.saveEditTodo = this.saveEditTodo.bind(this);
-  }
+    const dispatch = useDispatch();
+    const todos = useSelector(state => state.todos);
 
-  handleSubmit(e) {
-    e.preventDefault();
-    if (this.state.task.length > 0) {
-      this.props.addTodo(this.state.task);
-      this.setState({ task: '' });
-      e.target.reset();
-    }
-  }
+    const handleSubmit = useCallback((e) => {
+        e.preventDefault();
+        if (task.length > 0) {
+            dispatch(addTodo(task));
+            setTask('');
+            e.target.reset();
+        }
+    }, [task, dispatch]);
 
-  handleChange(e) {
-    this.setState({ [e.target.name]: e.target.value });
-  }
+    const handleChange = useCallback((e) => {
+        setTask(e.target.value);
+    }, []);
 
-  handleEditChange(e) {
-    this.setState({ editTask: e.target.value });
-  }
+    const handleEditChange = useCallback((e) => {
+        setEditTask(e.target.value);
+    }, []);
 
-  editTodo = (index, task) => {
-    this.setState({ editTask: task, editTaskIndex: index }, () => {
-      if (this.editInputRef.current) {
-        this.editInputRef.current.focus();
-      }
-    });
-  }
+    const editTodoHandler = useCallback((index, task) => {
+        setEditTask(task);
+        setEditTaskIndex(index);
+        setTimeout(() => {
+            if (editInputRef.current) {
+                editInputRef.current.focus();
+            }
+        }, 0);
+    }, []);
 
-  saveEditTodo = (id) => {
-    this.props.editTodo(id, this.state.editTask);
-    this.setState({ editTask: '', editTaskIndex: null });
-  }
+    const saveEditTodo = useCallback((id) => {
+        dispatch(editTodo(id, editTask));
+        setEditTask('');
+        setEditTaskIndex(null);
+    }, [editTask, dispatch]);
 
-  handleEditKeyPress = (e, id) => {
-    if (e.key === 'Enter') {
-      this.saveEditTodo(id);
-    }
-  }
-
-  render() {
-    const { todos, removeTodo } = this.props;
-    const { task, editTask, editTaskIndex } = this.state;
+    const handleEditKeyPress = useCallback((e, id) => {
+        if (e.key === 'Enter') {
+            saveEditTodo(id);
+        }
+    }, [saveEditTodo]);
 
     return (
-      <div>
-        <form onSubmit={this.handleSubmit}>
-          <label htmlFor="task">Task</label>
-          <input
-            type="text"
-            name="task"
-            id="task"
-            value={task}
-            onChange={this.handleChange}
-          />
-          <button type="submit" className="btn btn-default">Add Todo</button>
-        </form>
-        <ul>
-          {todos.map((val, index) => (
-            <li key={val.id}>
-              {editTaskIndex === index ? (
+        <div>
+            <form onSubmit={handleSubmit}>
+                <label htmlFor="task">Task</label>
                 <input
-                  ref={this.editInputRef}
-                  type="text"
-                  value={editTask}
-                  onChange={this.handleEditChange}
-                  onBlur={() => this.saveEditTodo(val.id)}
-                  onKeyPress={(e) => this.handleEditKeyPress(e, val.id)}
-                  autoFocus
+                    type="text"
+                    name="task"
+                    id="task"
+                    value={task}
+                    onChange={handleChange}
                 />
-              ) : (
-                <Todo
-                  removeTodo={() => removeTodo(val.id)}
-                  editTodo={() => this.editTodo(index, val.task)}
-                  task={val.task}
-                />
-              )}
-            </li>
-          ))}
-        </ul>
-      </div>
+                <button type="submit" className="btn btn-default">Add Todo</button>
+            </form>
+            <ul>
+                {todos && todos.map((val, index) => (
+                    <li key={val.id}>
+                        {editTaskIndex === index ? (
+                            <input
+                                ref={editInputRef}
+                                type="text"
+                                value={editTask}
+                                onChange={handleEditChange}
+                                onBlur={() => saveEditTodo(val.id)}
+                                onKeyPress={(e) => handleEditKeyPress(e, val.id)}
+                                autoFocus
+                            />
+                        ) : (
+                            <Todo
+                                removeTodo={() => dispatch(removeTodo(val.id))}
+                                editTodo={() => editTodoHandler(index, val.task)}
+                                task={val.task}
+                            />
+                        )}
+                    </li>
+                ))}
+            </ul>
+        </div>
     );
-  }
-}
-
-TodoList.propTypes = {
-  todos: PropTypes.array.isRequired,
-  addTodo: PropTypes.func.isRequired,
-  removeTodo: PropTypes.func.isRequired,
-  editTodo: PropTypes.func.isRequired
 };
 
-const mapStateToProps = state => ({
-  todos: state.todos
-});
-
-const mapDispatchToProps = {
-  addTodo,
-  removeTodo,
-  editTodo
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(TodoList);
+export default TodoList;
