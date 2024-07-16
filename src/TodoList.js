@@ -2,7 +2,6 @@ import React, { useState, useRef, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { addTodo, removeTodo, editTodo } from './actionCreators';
 import Todo from './Todo';
-import PropTypes from 'prop-types';
 
 const TodoList = () => {
     const [task, setTask] = useState('');
@@ -66,7 +65,7 @@ const TodoList = () => {
                 <button type="submit" className="btn btn-default">Add Todo</button>
             </form>
             <ul>
-                {todos.map((val, index) => (
+                {todos && todos.map((val, index) => (
                     <li key={val.id}>
                         {editTaskIndex === index ? (
                             <input
@@ -90,13 +89,6 @@ const TodoList = () => {
             </ul>
         </div>
     );
-};
-
-TodoList.propTypes = {
-    todos: PropTypes.array.isRequired,
-    addTodo: PropTypes.func.isRequired,
-    removeTodo: PropTypes.func.isRequired,
-    editTodo: PropTypes.func.isRequired
 };
 
 export default TodoList;
